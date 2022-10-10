@@ -1,0 +1,77 @@
+const API = "https://lernia-sjj-assignments.vercel.app/api/challenges";
+
+function filter() {
+	
+}
+
+document.addEventListener("DOMContentLoaded", function (event) {
+	let tags = new Set(), filterChallengesButton = document.querySelector("#our-challenges > button");
+	filterChallengesButton.addEventListener("click", function (event) {
+		filterChallengesButton.parentElement.nextElementSibling.style.setProperty("display", "grid");
+	}, false);
+	let ratingLimits = document.querySelectorAll(".rating > input[type='range']");
+	Array.from(ratingLimits).forEach(function (input) {
+		input.addEventListener("change", function (event) {
+			input.previousElementSibling.style.setProperty("width", `${input.value * 18}px`);
+		}, false);
+		input.dispatchEvent(new Event('change'));
+	});
+	fetch(API, {
+		"method": "GET",
+		"mode": "cors",
+	}).then(function (response) {
+		if (response.ok) {
+			response.json().then(function (data) {
+				let ul = document.querySelector('ul');
+				data.challenges.forEach(function (challenge) {
+					challenge.labels.forEach(function (label) {
+						tags.add(label);
+					});
+					ul.innerHTML += `
+						<li class="card" data-ranking="${challenge.rating}" data-type="${challenge.type}" data-labels="${challenge.labels.join(' ')}">
+							<div class="image" style="background-image: url('${challenge.image}')"></div>
+							<div class="content">
+								<div class="title">${challenge.title} (${challenge.type.replace("on", "on-")})</div>
+								<div class="rating">
+									<span><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i><i class="far fa-star"></i></span>
+									<span style="width: ${challenge.rating * 18}px"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+									${challenge.minParticipants}-${challenge.maxParticipants} participants
+								</div>
+								<div class="description">${challenge.description}</div>
+							</div>
+							<button class="primary on-white">Book this room</button>
+						</li>
+					`;
+				});
+				let filterByTags = document.querySelector("#filter-by-tags");
+				tags.forEach(function (tag) {
+					let label = document.createElement("label"),
+						input = document.createElement("input");
+					label.append(tag);
+					label.setAttribute("class", "chip");
+					label.setAttribute("for", `tag-${tag}`);
+					input.setAttribute("id", `tag-${tag}`);
+					input.setAttribute("checked", "checked");
+					input.setAttribute("class", "hidden");
+					input.setAttribute("name", "tags[]");
+					input.setAttribute("type", "checkbox");
+					input.setAttribute("value", tag);
+					filterByTags.append(input, label);
+				});
+				function filter (event) {
+					document.forms['filter-challenges'].elements['type[]'].filter(function (input) {
+						return input.checked;
+					}).map();
+					// Array.from(document.querySelectorAll('#challenges .card')).filter(function (card) {
+						
+					// });
+				}
+				document.forms['filter-challenges'].elements['keywords'].addEventListener("keyup", filter, false);
+				document.forms['filter-challenges'].elements.forEach(function (input) {
+					input.addEventListener("change", filter, false);
+				});
+			});
+			
+		}
+	});
+}, false);

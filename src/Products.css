@@ -1,0 +1,12 @@
+h5 {
+	margin: 12px 0px;
+}
+
+img {
+	margin: 8px;
+	width: calc(100% - 16px);
+}
+
+td, th {
+	text-align: center;
+}
